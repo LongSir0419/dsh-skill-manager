@@ -1,0 +1,8 @@
+# dsh-skill-manager bundle patch.
+# Installed via `dsh plugin --profile web add @wanghailong0419/dsh-skill-manager`.
+# One entry mounts both halves:
+#   - host half (lib/index.js): skill inventory Remote service
+#   - client half (lib/client.js): Settings "Skills" section
+- insert:
+    - id: dsh-skill-manager
+      name: '@wanghailong0419/dsh-skill-manager'
