@@ -45,8 +45,46 @@ try {
     // restore
     const restored = await svc.skillSet({ name: target.name, enabled: target.enabled });
     results.restored = restored?.enabled === target.enabled ? 'ok' : `unexpected: ${JSON.stringify(restored)}`;
+
+    // 3b. skillGet round-trip on the same skill
+    const got = await svc.skillGet({ name: target.name });
+    results.getResult = got?.ok === true && typeof got.content === 'string' && got.content.length > 0 ? 'ok' : `unexpected: ${JSON.stringify(got)}`;
   } else {
     results.toggleSkipped = 'no skills';
+  }
+
+  // 4. CRUD round-trip: create -> get -> update -> delete
+  const probeName = 'zzz-verify-probe';
+  try {
+    const created = await svc.skillCreate({ name: probeName, content: '---\nname: zzz-verify-probe\ndescription: "verify probe"\n---\n\n# Probe\n\nHello.' });
+    results.createResult = created?.ok === true ? 'ok' : `unexpected: ${JSON.stringify(created)}`;
+    const gotProbe = await svc.skillGet({ name: probeName });
+    results.getProbeResult = gotProbe?.ok === true && gotProbe.content.includes('Hello.') ? 'ok' : `unexpected: ${JSON.stringify(gotProbe)}`;
+    const updatedProbe = await svc.skillUpdate({ name: probeName, content: '---\nname: zzz-verify-probe\ndescription: "updated"\n---\n\n# Probe\n\nUpdated body.' });
+    results.updateResult = updatedProbe?.ok === true ? 'ok' : `unexpected: ${JSON.stringify(updatedProbe)}`;
+    const gotUpdated = await svc.skillGet({ name: probeName });
+    results.updateReadback = gotUpdated?.content.includes('Updated body.') ? 'ok' : `unexpected: ${JSON.stringify(gotUpdated)}`;
+    // duplicate-create must fail
+    let dupRejected = false;
+    try {
+      await svc.skillCreate({ name: probeName, content: '# dup' });
+    } catch {
+      dupRejected = true;
+    }
+    results.dupRejected = dupRejected ? 'ok' : 'unexpected: duplicate create succeeded';
+    const deleted = await svc.skillDelete({ name: probeName });
+    results.deleteResult = deleted?.ok === true ? 'ok' : `unexpected: ${JSON.stringify(deleted)}`;
+    let gone = false;
+    try {
+      await svc.skillGet({ name: probeName });
+    } catch {
+      gone = true;
+    }
+    results.goneAfterDelete = gone ? 'ok' : 'unexpected: skill still readable after delete';
+  } catch (err) {
+    results.crudError = String(err?.stack || err);
+    // best-effort cleanup so a failed run does not leave the probe skill behind
+    try { await svc.skillDelete({ name: probeName }); } catch { /* ignore */ }
   }
 } catch (err) {
   results.error = String(err?.stack || err);
