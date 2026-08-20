@@ -1,7 +1,7 @@
 {
   "name": "@wanghailong0419/dsh-skill-manager",
   "description": "DSH bundle: manage user-level skills from Settings — list all skills with enable/disable switches (disabled skills are excluded from model catalogs)",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
