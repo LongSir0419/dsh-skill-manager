@@ -11,7 +11,7 @@ A Skill management plugin for DeepSeek Harness (DSH) — manage all user-level S
 
 ## Features
 
-- **Skill list**: go to Settings → "Skill管理", lists all Skills under `$DSH_HOME/skills` (name + description)
+- **Skill list**: go to Settings → "Skill Manager", lists all Skills under `$DSH_HOME/skills` (name + description)
 - **Click to expand / collapse**: click anywhere on a row to expand details (Skill name + SKILL.md content), click again to collapse (input fields and buttons excluded)
 - **Enable / disable**: one toggle per Skill, takes effect immediately, updates state locally without flicker
 - **Edit / rename**: inline editing of name and SKILL.md content; renaming syncs the directory name
@@ -25,7 +25,7 @@ A single-package, two-half DSH bundle:
 | Half | Entry | Role |
 |---|---|---|
 | Host | `lib/index.js` | `skillManager` Remote service: skillList / skillSet / skillGet / skillCreate / skillUpdate / skillDelete / skillRename, edits SKILL.md frontmatter |
-| Client | `lib/client.js` | "Skill管理" section in the settings panel (`dsh.client` bundle) |
+| Client | `lib/client.js` | "Skill Manager" section in the settings panel (`dsh.client` bundle) |
 
 ## Installation
 
@@ -50,11 +50,11 @@ dsh plugin --profile web remove @wanghailong0419/dsh-skill-manager
 
 ## Usage
 
-1. Start `dsh web`, open **Settings → Skill管理**
+1. Start `dsh web`, open **Settings → Skill Manager**
 2. The list shows each Skill: status dot (green = enabled / gray = disabled), name, description
 3. Toggle enable/disable with the switch on the right
 4. Click a row to expand details: view Skill name and SKILL.md content, **edit** or **delete**
-5. Add: click "新增 Skill", fill in the name and content inline
+5. Add: click "Add Skill", fill in the name and content inline
 
 > Disable effect: adds `disable-model-invocation: true` to the SKILL.md frontmatter. DSH's skill-filesystem provider excludes the Skill from the model catalog and loader (watcher auto-refreshes, no restart needed).
 
