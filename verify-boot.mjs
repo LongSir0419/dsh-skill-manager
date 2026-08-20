@@ -81,6 +81,30 @@ try {
       gone = true;
     }
     results.goneAfterDelete = gone ? 'ok' : 'unexpected: skill still readable after delete';
+
+    // 5. rename round-trip: create -> rename -> old gone, new readable, frontmatter synced
+    const renameSrc = 'zzz-verify-rename-src';
+    const renameDst = 'zzz-verify-rename-dst';
+    try {
+      await svc.skillCreate({ name: renameSrc, content: '---\nname: zzz-verify-rename-src\ndescription: "rename probe"\n---\n\n# Rename probe\n\nBody.' });
+      const renamed = await svc.skillRename({ name: renameSrc, newName: renameDst });
+      results.renameResult = renamed?.ok === true ? 'ok' : `unexpected: ${JSON.stringify(renamed)}`;
+      let oldGone = false;
+      try {
+        await svc.skillGet({ name: renameSrc });
+      } catch {
+        oldGone = true;
+      }
+      results.renameOldGone = oldGone ? 'ok' : 'unexpected: old name still readable';
+      const renamedGet = await svc.skillGet({ name: renameDst });
+      results.renameNewReadable = renamedGet?.ok === true && renamedGet.content.includes('Rename probe') ? 'ok' : `unexpected: ${JSON.stringify(renamedGet)}`;
+      results.renameFrontmatter = renamedGet?.content.includes('name: zzz-verify-rename-dst') ? 'ok' : 'unexpected: frontmatter name not synced';
+      await svc.skillDelete({ name: renameDst });
+    } catch (err) {
+      results.renameError = String(err?.stack || err);
+      try { await svc.skillDelete({ name: renameDst }); } catch { /* ignore */ }
+      try { await svc.skillDelete({ name: renameSrc }); } catch { /* ignore */ }
+    }
   } catch (err) {
     results.crudError = String(err?.stack || err);
     // best-effort cleanup so a failed run does not leave the probe skill behind
